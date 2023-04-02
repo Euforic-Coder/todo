@@ -4,14 +4,8 @@
 #include <algorithm>
 #include "uforia/uforia.h"
 
-#define DEBUG 0
-#if DEBUG
-#define LOG(x) cout << colored(x, Red, Bold) << endl
-#else
-#define LOG(x)
-#endif
-
 using namespace std;
+using namespace uforia;
 
 string path;
 
@@ -57,7 +51,6 @@ void read(){
             tasks.push_back(task);
         }
     }
-    LOG("Tasks read");
 }
 
 // Write file
@@ -67,7 +60,6 @@ void write(){
         Task task = tasks[i];
         write << task.id << ";" << task.priority << ";" << task.description << endl;
     }
-    LOG("Tasks writen");
 }
 
 // Add a task
@@ -77,7 +69,6 @@ void add(string description, int priority){
     task.priority = priority;
     task.get_id();
     tasks.push_back(task);
-    LOG("Task added");
 }
 
 // Remove a task
@@ -88,7 +79,6 @@ void remove(int id){
             tasks.erase(tasks.begin() + i);
             b = true;
             write();
-            LOG("Task removed");
         }
     }
     if(!b){
@@ -104,7 +94,6 @@ void clear(){
     if(lowercase(buffer) == "y"){
         tasks.clear();
         write();
-        LOG("Tasks cleared");
     }
 }
 
@@ -131,12 +120,12 @@ void print(){
 
 // Help menu
 void help(){
-    HelpMaker help("todo");
-    help.add_argument("-a", "Add a task");
-    help.add_argument("-r", "Remove a task by ID");
-    help.add_argument("-l", "List all tasks");
-    help.add_argument("-c", "Clear all tasks");
-    help.add_argument("-h", "Print help menu");
+    HelpMenu help("todo");
+    help.add_option("-a", "Add a task", true);
+    help.add_option("-r", "Remove a task by ID", true);
+    help.add_option("-l", "List all tasks", true);
+    help.add_option("-c", "Clear all tasks", false);
+    help.add_option("-h", "Print help menu", false);
     help.print();
 }
 
@@ -145,7 +134,6 @@ int main(int argc, char* argv[]){
     // Get path of .todo
     path = getenv("HOME");
     path = path + "/.todo";
-    LOG(path);
 
     read();
 
@@ -161,27 +149,15 @@ int main(int argc, char* argv[]){
             description = buffer;
             cout << "Enter the priority: ";
             cin >> buffer;
-
-            // Check if the entered value is numberic
-            if(is_number(buffer)){
-                int priority = stoi(buffer);
-                add(description, priority);
-                write();
-            }else{
-                error("Priority has to be a numberic value", true);
-            }
+            int priority = stoi(buffer);
+            add(description, priority);
+            write();
             break;
         }
         case 'r':{
             int id;
-
-            // Check if the entered value is numberic
-            if(is_number(optarg)){
-                id = stoi(optarg);
-                remove(id);}
-            else {
-                error("ID has to be a numberic value", true);
-            }
+			id = stoi(optarg);
+            remove(id);
             break;
         }
         case 'l':
