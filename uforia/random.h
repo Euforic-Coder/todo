@@ -4,9 +4,13 @@
 #include <chrono>
 #include <iostream>
 
-int true_rand(){
+namespace uforia{
+
+	// Returns a truely random int
+  int true_rand(){
     srand(std::chrono::high_resolution_clock::now().time_since_epoch().count());
     return rand();
+  }
 }
 
 #endif // RANDOM_H
