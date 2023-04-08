@@ -20,7 +20,7 @@ vector<Task> tasks;
 // Give a task an id
 void Task::get_id(){
     // sort tasks by ID
-    sort(tasks.begin(), tasks.end(), [](Task a, Task b){
+    sort(tasks.begin(), tasks.end(), [](const Task& a, const Task& b){
         return a.id < b.id;
     });
 
@@ -147,17 +147,33 @@ int main(int argc, char* argv[]){
             cout << "Enter the description: ";
             getline(cin, buffer);
             description = buffer;
+
+            // Checks if the given string doesn't have a ';' in it
+            if(has(';', buffer)){
+                error("Description can not have a ';' in it", true);
+            }
+
             cout << "Enter the priority: ";
             cin >> buffer;
-            int priority = stoi(buffer);
-            add(description, priority);
-            write();
+
+            // Checks if the given priority is numeric
+            if(is_numeric(buffer)) {
+                int priority = stoi(buffer);
+                add(description, priority);
+                write();
+            }else{
+                error("The given priority must be numeric", true);
+            }
             break;
         }
         case 'r':{
             int id;
-			id = stoi(optarg);
-            remove(id);
+            if(is_numeric(optarg)) {
+                id = stoi(optarg);
+                remove(id);
+            }else{
+                error("The given ID must be numeric", true);
+            }
             break;
         }
         case 'l':
