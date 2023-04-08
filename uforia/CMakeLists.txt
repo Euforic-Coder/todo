@@ -1,5 +1,7 @@
-cmake_minimum_required (VERSION 2.8.11)
-project (uforia)
+cmake_minimum_required(VERSION 2.8.11)
+set(CMAKE_CXX_STANDARD 11)
+
+project(uforia)
 
 add_library(colored colored.h)
 add_library(from from.h)
@@ -13,6 +15,6 @@ add_library(unique unique.h)
 add_library(count count.h)
 add_library(uforia uforia.h)
 
-foreach(target IN ITEMS colored from has messages random strings helpmenu debug unique count uforia)
-	set_target_properties(${target} PROPERTIES LINKER_LANGUAGE CXX)
-endforeach()
+foreach (target IN ITEMS colored from has messages random strings helpmenu debug unique count uforia)
+    set_target_properties(${target} PROPERTIES LINKER_LANGUAGE CXX)
+endforeach ()
