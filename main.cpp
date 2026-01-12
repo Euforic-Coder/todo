@@ -6,6 +6,7 @@
 
 using namespace std;
 
+
 // Debug logging
 void log(const string &s) {
     cout << "Debug: " + s << endl;
@@ -14,18 +15,25 @@ void log(const string &s) {
 class Task {
 public:
     Task();
+
     int get_id();
+
     int get_priority();
+
+    void set_id(int i);
+
     void set_priority(int i);
+
     void set_description(string s);
+
     string get_description();
+
 private:
     int id = 0, priority = 0;
     string description;
 
     void give_id();
 };
-
 
 vector<Task> tasks;
 
@@ -42,6 +50,10 @@ int Task::get_id() {
 // Gives the priority of the task
 int Task::get_priority() {
     return priority;
+}
+
+void Task::set_id(int i) {
+    this->id = i;
 }
 
 void Task::set_priority(int i) {
@@ -71,10 +83,67 @@ void Task::give_id() {
     }
 }
 
+string file_path = "todo.txt";
+
+// Read tasks from file
+void read() {
+    log("read file");
+    ifstream read_file(file_path);
+    if (read_file.good() && read_file.peek() != EOF) {
+        // Convert file in lines
+        string line;
+        while (getline(read_file, line)) {
+            log(line);
+
+            // Split lines into datatypes and make a task
+            vector<string> buffer;
+            int pos = 0, len = 0;
+            for (int i = 0; i < line.length(); ++i) {
+                char c = line[i];
+                if (c == ';') {
+                    buffer.push_back(line.substr(pos, len));
+                    log(line.substr(pos, len));
+                    len = 0;
+                    pos = i + 1;
+                } else if (i == line.length() - 1) {
+                    int end = line.length() - pos;
+                    buffer.push_back(line.substr(pos, end));
+                    log(line.substr(pos, len));
+                } else {
+                    len++;
+                }
+            }
+            // Debug
+            for (const auto &a: buffer) {
+                log(a);
+            }
+
+            // Convert data into a task
+            Task task;
+            int id = stoi(buffer[0]), priority = stoi(buffer[1]);
+            string description = buffer[2];
+            task.set_id(id);
+            task.set_priority(priority);
+            task.set_description(description);
+
+            // Add task to tasks
+            tasks.push_back(task);
+        }
+    }
+}
+
+// Write tasks to file
+void write() {
+    ofstream write_file(file_path);
+    for (int i = 0; i < tasks.size(); ++i) {
+        Task task = tasks[i];
+        write_file << task.get_id() << ";" << task.get_priority() << ";" << task.get_description() << endl;
+    }
+}
 
 int main(int argc, char *argv[]) {
     bool flag_add = false, flag_remove = false, flag_list = false, flag_clear = false, flag_help = false,
-    flag_debug = true;
+            flag_debug = true;
 
     // Handle getopt
     int opt;
@@ -116,6 +185,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    read();
+
     // Add a task to the list
     if (flag_add) {
         Task task;
@@ -126,7 +197,7 @@ int main(int argc, char *argv[]) {
         task.set_description(s);
 
         cout << "Set priority : ";
-        getline(cin,s);
+        getline(cin, s);
         task.set_priority(stoi(s));
 
         tasks.push_back(task);
@@ -134,7 +205,7 @@ int main(int argc, char *argv[]) {
         if (flag_debug) {
             log(to_string(task.get_id()) + " - " + to_string(task.get_priority()) + " - " + task.get_description());
         }
-        }
+    }
 
     // TODO: Remove a task
     if (flag_remove) {
@@ -142,6 +213,21 @@ int main(int argc, char *argv[]) {
 
     // TODO: List all tasks
     if (flag_list) {
+        if (!tasks.empty()) {
+            // Sort tasks by priority
+            sort(tasks.begin(), tasks.end(), [](Task a, Task b) {
+                return a.get_priority() > b.get_priority();
+            });
+
+            // List header
+            cout << "ID\tPriority\tDescription" << endl;
+            cout << "----------------------------------------------" << endl;
+
+            for (int i = 0; i < tasks.size(); ++i) {
+                Task task = tasks[i];
+                cout << task.get_id() << "\t" << task.get_priority() << "\t\t" << task.get_description() << endl;
+            }
+        }
     }
 
     // TODO: Clear all tasks
@@ -159,4 +245,6 @@ int main(int argc, char *argv[]) {
         cout << "-c, --clear" << "\t" << "Clear all tasks" << endl;
         cout << "-h, --help" << "\t" << "Print helpmenu" << endl;
     }
+
+    return 0;
 }
